@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -75,14 +76,26 @@ func commit(message string, push bool) {
 		return
 	}
 
-	cmd := exec.Command("git", "add", ".")
-	err := cmd.Run()
-	if err != nil {
-		panic(err)
+	trackedFiles := getModifiedFiles()
+	unTrackedFiles := getUntrackedFiles()
+	for _, tf := range trackedFiles {
+		if tf == "" {
+			continue
+		}
+
+		commitFile(tf, false)
 	}
 
-	cmd = exec.Command("git", "commit", "-m", message)
-	err = cmd.Run()
+	for _, uf := range unTrackedFiles {
+		if uf == "" {
+			continue
+		}
+
+		commitFile(uf, true)
+	}
+
+	cmd := exec.Command("git", "commit", "-m", message)
+	err := cmd.Run()
 	if err != nil {
 		panic(err)
 	}
@@ -95,6 +108,58 @@ func commit(message string, push bool) {
 
 		cmd = exec.Command("git", "push")
 		err = cmd.Run()
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func getUntrackedFiles() []string {
+	var out bytes.Buffer
+	cmd := exec.Command("git", "ls-files", "--others", "--exclude-standard")
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	outStr := out.String()
+	if outStr == "" {
+		return make([]string, 0)
+	}
+
+	files := strings.Split(outStr, "\n")
+	return files
+}
+
+func getModifiedFiles() []string {
+	var out bytes.Buffer
+	cmd := exec.Command("git", "ls-files", "--modified")
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	outStr := out.String()
+	if outStr == "" {
+		return make([]string, 0)
+	}
+
+	files := strings.Split(outStr, "\n")
+	return files
+}
+
+func commitFile(file string, isUntracked bool) {
+	var choice string
+	if isUntracked {
+		fmt.Printf("Commit untracked file: '%s'? (y/n) ", file)
+		fmt.Scan(&choice)
+	}
+
+	if !isUntracked || choice == "y" || choice == "Y" {
+		cmd := exec.Command("git", "add", file)
+		err := cmd.Run()
 		if err != nil {
 			panic(err)
 		}
