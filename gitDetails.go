@@ -68,3 +68,35 @@ func dirExists(path string) bool {
 
 	return false
 }
+
+func commit(message string, push bool) {
+	repoCheck := getCurDir()
+	if repoCheck == "" {
+		return
+	}
+
+	cmd := exec.Command("git", "add", ".")
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	cmd = exec.Command("git", "commit", "-m", message)
+	err = cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	if push {
+		_, hasUpstream := getUpstreamUrl()
+		if !hasUpstream {
+			return
+		}
+
+		cmd = exec.Command("git", "push")
+		err = cmd.Run()
+		if err != nil {
+			panic(err)
+		}
+	}
+}

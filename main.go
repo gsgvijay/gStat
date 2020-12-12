@@ -11,7 +11,14 @@ func main() {
 	userPtr := flag.String("user", "", "Git user name")
 	repoPtr := flag.String("repo", "", "Repository")
 	prNumPtr := flag.Int("pr", -1, "Pull Request number")
+	commitMessage := flag.String("commit", "", "Commit message")
+	pushCommit := flag.Bool("noPush", true, "Suppress pushing to remote")
 	flag.Parse()
+
+	if *commitMessage != "" {
+		commit(*commitMessage, *pushCommit)
+		return
+	}
 
 	user, repos := nullCheck(userPtr, repoPtr)
 
