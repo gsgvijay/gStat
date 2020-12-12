@@ -12,7 +12,7 @@ func main() {
 	repoPtr := flag.String("repo", "", "Repository")
 	prNumPtr := flag.Int("pr", -1, "Pull Request number")
 	commitMessage := flag.String("commit", "", "Commit message")
-	pushCommit := flag.Bool("noPush", true, "Suppress pushing to remote")
+	pushCommit := flag.Bool("noPush", false, "Suppress pushing to remote")
 	flag.Parse()
 
 	if *commitMessage != "" {

@@ -70,7 +70,7 @@ func dirExists(path string) bool {
 	return false
 }
 
-func commit(message string, push bool) {
+func commit(message string, noPush bool) {
 	repoCheck := getCurDir()
 	if repoCheck == "" {
 		return
@@ -100,7 +100,7 @@ func commit(message string, push bool) {
 		panic(err)
 	}
 
-	if push {
+	if !noPush {
 		_, hasUpstream := getUpstreamUrl()
 		if !hasUpstream {
 			return
